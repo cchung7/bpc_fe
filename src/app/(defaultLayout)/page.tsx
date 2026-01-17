@@ -1,7 +1,7 @@
 const HomePage = () => {
   return (
-    <div>
-      <h1>Home Page</h1>
+    <div className="p-6 flex flex-col gap-6 mb-20">
+      <h1 className="text-5xl">Home Page</h1>
     </div>
   );
 };

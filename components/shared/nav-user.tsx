@@ -18,9 +18,9 @@ import {
 import placeholder from "@/src/assets/placeholders/image_placeholder.png";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 
-import { useGetMeQuery } from "@/redux/api/authApi";
-import { logout } from "@/redux/features/authSlice";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { useGetMeQuery } from "@/src/redux/api/authApi";
+import { logout } from "@/src/redux/features/authSlice";
+import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
