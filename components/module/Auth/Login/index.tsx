@@ -2,6 +2,7 @@
 
 import PHInput from "@/components/form/NRInput";
 import { Button } from "@/components/ui/button";
+import { useLoginMutation } from "@/src/redux/api/authApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
@@ -17,6 +18,8 @@ const schema = z.object({
 });
 
 const LoginPage = () => {
+  const [login, { isLoading }] = useLoginMutation();
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
