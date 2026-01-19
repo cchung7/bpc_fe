@@ -197,7 +197,7 @@ const MemberDirectory = () => {
           </div>
         </div>
 
-        <div className="mt-10 mb-16 grid grid-cols-4 gap-8">
+        <div className="mt-10 mb-16 grid grid-cols-1 md:grid-cols-4 gap-8">
           {filteredPlayers.map((item, idx) => (
             <div key={idx} onClick={() => handlePlayerClick(item)}>
               <PlayerCard item={item} />

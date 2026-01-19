@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import UserCard from "./UserCard";
 
 const HeroSection = () => {
@@ -13,9 +12,9 @@ const HeroSection = () => {
             Engage with leaders, exchange ideas, and build connections <br />{" "}
             that unlock new opportunities.
           </p>
-          <Button className="text-center py-7 rounded-4xl px-6">
+          {/* <Button className="text-center py-7 rounded-4xl px-6">
             See Upcoming Events
-          </Button>
+          </Button> */}
         </div>
       </div>
       <div>

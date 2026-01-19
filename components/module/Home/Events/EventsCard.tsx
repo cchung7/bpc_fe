@@ -43,9 +43,12 @@ const EventsCard = ({ event }: { event?: any }) => {
           </div>
         </div>
 
-        <Link href={`/events/${eventData?.id}`} className="btn w-full">
+        <Link
+          href={`/event-registration/${eventData?.id}`}
+          className="btn w-full"
+        >
           {" "}
-          <button className="  bg-pink-200 hover:bg-pink-300 text-black font-medium py-3 px-6 rounded-full transition-colors duration-200">
+          <button className="  bg-pink-200 cursor-pointer hover:bg-pink-300 text-black font-medium py-3 px-6 rounded-full transition-colors duration-200">
             Register Now
           </button>
         </Link>

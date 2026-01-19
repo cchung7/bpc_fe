@@ -1,9 +1,9 @@
-import EventRegistration from "@/components/module/Events/EventRegistration";
+import EventDetailsPage from "@/components/module/EventPage";
 
 const page = () => {
   return (
     <div>
-      <EventRegistration />
+      < EventDetailsPage />
     </div>
   );
 };

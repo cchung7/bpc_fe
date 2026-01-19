@@ -34,7 +34,7 @@ const NRDatePicker = ({ name, label, control }: NRDatePickerProps) => {
           {label && <FormLabel>{label}</FormLabel>}
 
           <Popover>
-            <PopoverTrigger asChild>
+            <PopoverTrigger className="py-6" asChild>
               <FormControl>
                 <Button
                   variant="outline"
@@ -56,6 +56,12 @@ const NRDatePicker = ({ name, label, control }: NRDatePickerProps) => {
                 mode="single"
                 selected={field.value}
                 onSelect={field.onChange}
+                disabled={(date) => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  date.setHours(0, 0, 0, 0);
+                  return date < today;
+                }}
                 initialFocus
               />
             </PopoverContent>

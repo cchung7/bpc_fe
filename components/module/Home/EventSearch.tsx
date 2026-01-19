@@ -2,6 +2,7 @@
 
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function EventSearch() {
@@ -69,8 +70,7 @@ export default function EventSearch() {
             </div>
           </div>
         )}
-
-        {/* Expanded Date & Time Picker */}
+        
         {isExpanded && (
           <div className="overflow-hidden rounded-3xl shadow-xl">
             <div className="bg-[#d4ff4c] p-6">
@@ -118,12 +118,14 @@ export default function EventSearch() {
 
             {/* Close/Collapse Button */}
             <div className="bg-white px-6 pb-6">
-              <button
-                onClick={handleSearch}
-                className="w-full rounded-lg bg-black px-4 py-3 text-white transition-colors hover:bg-gray-800"
-              >
-                Search Events
-              </button>
+              <Link href="/events/event-results">
+                <button
+                  onClick={handleSearch}
+                  className="w-full rounded-lg bg-black px-4 py-3 text-white transition-colors hover:bg-gray-800"
+                >
+                  Search Events
+                </button>
+              </Link>
             </div>
           </div>
         )}

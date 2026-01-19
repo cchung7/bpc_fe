@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 const Membership = () => {
   return (
@@ -21,15 +22,17 @@ const Membership = () => {
               with our membership plans.
             </p>
 
-            <Button
-              size="lg"
-              className="rounded-xl bg-lime-400 text-black px-10 py-6 text-base font-semibold hover:bg-lime-300"
-            >
-              Join now
-            </Button>
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="rounded-xl bg-lime-400 text-black px-10 py-6 text-base font-semibold hover:bg-lime-300"
+              >
+                Join now
+              </Button>
+            </Link>
           </div>
-
-          <div className="relative h-80 sm:h-[420px] w-full">
+          
+          <div className="relative h-80 sm:h-105 w-full">
             <Image
               src="/images/man.jpg"
               alt="Membership Court"

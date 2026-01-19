@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, MapPin, Ticket } from "lucide-react";
+import Link from "next/link";
 
 export default function EventCard({ event }: any) {
   return (
@@ -34,10 +35,12 @@ export default function EventCard({ event }: any) {
             <span>$299 | Free for Members</span>
           </div>
         </div>
-
-        <Button className="rounded-full px-6 py-5 bg-purple-200 text-purple-900 hover:bg-purple-300">
-          Event Details
-        </Button>
+        
+        <Link href={`/events/1`}>
+          <Button className="rounded-full px-6 py-5 bg-purple-200 text-purple-900 hover:bg-purple-300">
+            Event Details
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );

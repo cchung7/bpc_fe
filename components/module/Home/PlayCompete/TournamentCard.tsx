@@ -1,4 +1,5 @@
 import { CalendarIcon, MapPinIcon, User2 } from "lucide-react";
+import Link from "next/link";
 
 const TournamentCard = ({
   tournament: { title, date, location, participants },
@@ -29,9 +30,11 @@ const TournamentCard = ({
         <span>1 / 32 participants</span>
       </div>
 
-      <button className="w-full bg-[#ccf64d] hover:bg-[#b8e040] text-black font-medium py-2 rounded-lg">
-        View Details
-      </button>
+      <Link href="/events/1">
+        <button className="w-full bg-[#ccf64d] hover:bg-[#b8e040] text-black font-medium py-2 rounded-lg">
+          View Details
+        </button>
+      </Link>
     </div>
   );
 };

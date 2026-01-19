@@ -41,7 +41,7 @@ const TablePagination = ({
   };
 
   return (
-    <div className="flex items-center justify-end gap-3 p-8">
+    <div className="flex items-center justify-start gap-3 p-8">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={isFirstPage}

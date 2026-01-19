@@ -40,7 +40,7 @@ const data = {
       },
     ],
   },
-  // admin side...
+
   admin: {
     navMain: [
       {
@@ -49,25 +49,40 @@ const data = {
         icon: LayoutDashboard,
       },
       {
-        title: "Users",
-        url: "/user/dashboard/users",
+        title: "Members Management",
+        url: "/admin/dashboard/members",
         icon: HandCoins,
         items: [
           {
-            title: "Users",
-            url: "/user/dashboard/estimates",
+            title: "Members",
+            url: "/admin/dashboard/members",
             icon: Users,
           },
           {
-            title: "Pending Users",
-            url: "/user/dashboard/pending-users",
+            title: "Pending Approval",
+            url: "/admin/dashboard/members/pending-approval",
+            icon: Users,
+          },
+          {
+            title: "Approved",
+            url: "/admin/dashboard/members/appproved",
+            icon: InfoIcon,
+          },
+          {
+            title: "Rejected",
+            url: "/admin/dashboard/members/rejected",
             icon: InfoIcon,
           },
         ],
       },
       {
-        title: "Your Profile",
-        url: "/user/dashboard/profile",
+        title: "Events",
+        url: "/admin/dashboard/events",
+        icon: User,
+      },
+      {
+        title: "Notifications",
+        url: "/admin/dashboard/notifications",
         icon: User,
       },
       {
@@ -79,14 +94,13 @@ const data = {
   },
 };
 
-// Roles - to be added...
 interface AppSidebarProps {
   role: string;
 }
 
 export default function AppSidebar({ role, ...props }: AppSidebarProps) {
   const sidebarData = data[role?.toLowerCase() as keyof typeof data];
-
+ 
   return (
     <Sidebar
       collapsible="icon"
@@ -103,7 +117,7 @@ export default function AppSidebar({ role, ...props }: AppSidebarProps) {
             alt="Logo"
             width={300}
             height={300}
-            className="size-auto "
+            className="size-auto rounded-2xl"
           />
         </Link>
       </SidebarHeader>

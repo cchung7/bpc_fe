@@ -20,8 +20,7 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "Events", href: "/events" },
     { label: "Member Directory", href: "/member-directory" },
-    { label: "Learning Library", href: "/library" },
-    { label: "Pricing", href: "/pricing" },
+    { label: "Membership", href: "/membership"},
   ];
 
   useEffect(() => {
