@@ -1,4 +1,4 @@
-import { UpdateEventForm } from "@/components/module/Dashboard/Events/UpdateEventsForm";
+import UpdateEventForm from "@/components/module/Dashboard/Events/UpdateEventsForm";
 
 const page = () => {
   return (

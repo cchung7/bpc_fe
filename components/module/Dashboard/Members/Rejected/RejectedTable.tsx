@@ -1,105 +1,85 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Check, Trash2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import DeleteConfirmationModal from "@/components/ui/core/NRModal/DeleteConfirmationModal";
+import ApproveConfirmationModal from "@/components/ui/core/NRModal/ApproveConfirmationModal";
 import { NRTable } from "@/components/ui/core/NRTable";
 import TablePagination from "@/components/ui/core/NRTable/TablePagination";
+import { useApprovedMemberMutation } from "@/src/redux/api/memberApi";
 
 interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
-  date: string;
-  count: number;
-  status: "Approved" | "Pending" | "Rejected";
+  createdAt: string;
+  eventsAttended: number;
+  adminApprovedStatus: string;
 }
 
-const users: User[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
-    phone: "+1 (555) 123-4567",
-    date: "Nov 15, 2023",
-    count: 8,
-    status: "Rejected",
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    phone: "+1 (555) 234-5678",
-    date: "Dec 1, 2023",
-    count: 0,
-    status: "Rejected",
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    phone: "+1 (555) 234-5678",
-    date: "Dec 1, 2023",
-    count: 0,
-    status: "Rejected",
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    phone: "+1 (555) 234-5678",
-    date: "Dec 1, 2023",
-    count: 0,
-    status: "Rejected",
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    phone: "+1 (555) 234-5678",
-    date: "Dec 1, 2023",
-    count: 0,
-    status: "Rejected",
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    phone: "+1 (555) 234-5678",
-    date: "Dec 1, 2023",
-    count: 0,
-    status: "Rejected",
-  },
-];
+export enum AdminApprovedStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  SUSPENDED = "SUSPENDED",
+}
 
-const RejectedTable = () => {
+const STATUS_UI = {
+  [AdminApprovedStatus.PENDING]: "bg-yellow-100 text-yellow-700",
+  [AdminApprovedStatus.APPROVED]: "bg-green-100 text-green-700",
+  [AdminApprovedStatus.REJECTED]: "bg-red-100 text-red-700",
+  [AdminApprovedStatus.SUSPENDED]: "bg-gray-100 text-gray-700",
+};
+
+const RejectedTable = ({ users, meta, currentPage, setCurrentPage }: any) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectId, setSelectId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const totalPages = meta?.total ? Math.ceil(meta.total / meta.limit) : 1;
 
-  const handleDelete = () => {
+  const [approvedMember] = useApprovedMemberMutation();
+
+  const handleApprove = async () => {
     if (selectedUser) {
-      toast.success(`${selectedUser.name} removed successfully`);
+      try {
+        const res = await approvedMember(selectedUser.id).unwrap();
+
+        if (res.success) {
+          toast.success(res.message);
+        } else {
+          toast.error("Failed to approve user");
+        }
+      } catch (error) {
+        console.error("Approval failed:", error);
+        toast.error("An error occurred while approving the user");
+      }
+
+      setModalOpen(false);
+      setSelectedUser(null);
     }
-    setModalOpen(false);
-    setSelectedUser(null);
   };
 
-  const handleApprove = (user: User) => {
-    toast.success(`${user.name} approved`);
-  };
+  // const handleApprove = (user: User) => {
+  //   // Simulate approving the user
+  //   toast.success(`${user.firstName} ${user.lastName} approved`);
 
-  const columns: ColumnDef<User>[] = [
+  //   // You can also update the user status here if needed
+  //   // approvedMember(user.id);
+  // };
+
+  const columns: ColumnDef<any>[] = [
     {
       header: "Member",
-      accessorKey: "name",
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-semibold text-gray-900">
-            {row.original.name}
+            {row.original.firstName} {row.original.lastName}
           </span>
           <span className="text-sm text-gray-500">{row.original.email}</span>
         </div>
@@ -108,30 +88,40 @@ const RejectedTable = () => {
     {
       header: "Phone",
       accessorKey: "phone",
+      cell: ({ row }) => (
+        <span className="text-gray-900">{row.original.phone}</span>
+      ),
     },
     {
       header: "Joined",
-      accessorKey: "date",
+      cell: ({ row }) => {
+        const createdAt = row.original.createdAt;
+        return (
+          <span className="text-gray-900">
+            {createdAt
+              ? new Date(createdAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "N/A"}
+          </span>
+        );
+      },
     },
     {
-      header: "Count",
-      accessorKey: "count",
+      header: "Events Attended",
+      accessorKey: "eventsAttended",
     },
     {
       header: "Status",
-      accessorKey: "status",
       cell: ({ row }) => {
-        const status = row.original.status;
-
-        const statusStyles = {
-          Approved: "bg-green-100 text-green-700",
-          Pending: "bg-yellow-100 text-yellow-700",
-          Rejected: "bg-red-100 text-red-700",
-        };
+        const status = row.original.adminApprovedStatus ?? "PENDING";
 
         return (
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}
+            className={`px-3 py-1 rounded-full text-xs font-medium
+              ${STATUS_UI[status as AdminApprovedStatus]}`}
           >
             {status}
           </span>
@@ -143,22 +133,17 @@ const RejectedTable = () => {
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           <button
-            onClick={() => handleApprove(row.original)}
-            className="text-green-600 hover:text-green-800"
-            title="Approve"
-          >
-            <Check size={18} />
-          </button>
-
-          <button
             onClick={() => {
+              setSelectId(row.original.id);
+              setSelectedItem(
+                `${row.original.firstName} ${row.original.lastName}`
+              );
               setSelectedUser(row.original);
               setModalOpen(true);
             }}
-            className="text-red-600 hover:text-red-800"
-            title="Delete"
+            className="text-green-500 hover:text-green-700"
           >
-            <Trash2 size={18} />
+            <Check size={18} />
           </button>
         </div>
       ),
@@ -171,13 +156,18 @@ const RejectedTable = () => {
 
       <NRTable columns={columns} data={users} />
 
-      <DeleteConfirmationModal
-        name={selectedUser?.name ?? ""}
+      <ApproveConfirmationModal
+        name={selectedItem ?? ""}
         isOpen={isModalOpen}
         onOpenChange={setModalOpen}
-        onConfirm={handleDelete}
+        onConfirm={handleApprove}
+        title="Approve Member"
       />
-      <TablePagination totalPage={10} currentPage={1} onPageChange={() => {}} />
+      <TablePagination
+        totalPage={totalPages}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

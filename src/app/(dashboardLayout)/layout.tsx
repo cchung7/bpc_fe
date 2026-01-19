@@ -7,8 +7,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-import { useAppSelector } from "@/redux/hooks";
 import { useDecodedToken } from "@/src/hooks/useDecodedToken";
+import { useAppSelector } from "@/src/redux/hooks";
 
 export default function DashboardLayout({
   children,
@@ -21,7 +21,6 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      {/* Pass the user role dynamically to AppSidebar */}
       <AppSidebar role={role} />
       <SidebarInset>
         <header className="flex h-16 b shrink-0  items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { CircleCheckBig } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -115,7 +114,6 @@ const MembershipPage = () => {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="py-20 px-4 container mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((item, index) => (
@@ -147,7 +145,6 @@ const MembershipPage = () => {
         </div>
       </section>
 
-      {/* WORLD CLASS */}
       <section className="py-20 px-4 container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
@@ -188,7 +185,6 @@ const MembershipPage = () => {
         </div>
       </section>
 
-      {/* SOCIAL */}
       <section className="py-20 px-4 container mx-auto">
         <div className="grid md:grid-cols-2 gap-14 items-center">
           <div>
@@ -217,39 +213,38 @@ const MembershipPage = () => {
 
           <Image
             src="/images/Rectangle 522.png"
-            width={600}
-            height={600}
+            width={500}
+            height={500}
             alt="Social Events"
             className="rounded-2xl object-cover"
           />
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="relative h-[60vh] container mx-auto mb-20 rounded-2xl overflow-hidden">
+      <section className="relative h-[60vh] sm:h-[70vh] md:h-[80vh] mx-4 sm:mx-8 mb-20 rounded-2xl overflow-hidden">
         <Image
           src="/images/Rectangle 51.png"
           alt="Join Membership"
           fill
           className="object-cover"
         />
+
         <div className="absolute inset-0 bg-black/50" />
 
         <div className="relative z-10 flex h-full items-center justify-center px-4">
-          <div className="bg-white/90 w-[70%] backdrop-blur-lg rounded-2xl px-14 py-16 text-center shadow-xl">
-            <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
+          <div className="bg-white/90 w-full sm:w-4/5 md:w-3/5 backdrop-blur-lg rounded-2xl px-6 sm:px-10 md:px-14 py-8 sm:py-12 md:py-16 text-center shadow-xl">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold mb-4">
               We Would Love to Have You as a Member
             </h2>
-            <p className="text-gray-700 text-lg max-w-xl mx-auto mb-6">
+            <p className="text-gray-700 text-sm sm:text-base md:text-lg lg:text-xl max-w-lg mx-auto mb-6 leading-relaxed">
               Join a community committed to tennis, fitness, and lifelong
               friendships.
             </p>
 
-            <Link href="/membership" className="btn btn-primary">
-              {" "}
-              <Button className="rounded-full cursor-pointer px-10 py-3 text-black font-semibold  transition">
+            <Link href="/register">
+              <button className="bg-primary text-black rounded-full px-6 sm:px-8 md:px-10 py-2 sm:py-3 md:py-4 font-semibold hover:bg-primary/90 transition">
                 Join Now
-              </Button>
+              </button>
             </Link>
           </div>
         </div>

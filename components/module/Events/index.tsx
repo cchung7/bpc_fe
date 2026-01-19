@@ -2,6 +2,7 @@
 
 import EventCard from "@/components/Common/EventsCard";
 import MetricCard from "@/components/Common/MetricCard";
+import { useGetEventStatusQuery } from "@/src/redux/api/eventApi";
 import EventsCard from "../Home/Events/EventsCard";
 import Membership from "../Home/Membership";
 
@@ -53,42 +54,39 @@ const dammyEvents = [
 ];
 
 const wayEventsData = [
-  {
-    id: 1,
-    name: "Event 1",
-  },
-  {
-    id: 2,
-    name: "Event 2",
-  },
-  {
-    id: 2,
-    name: "Event 2",
-  },
-  {
-    id: 2,
-    name: "Event 2",
-  },
+  { id: 1, name: "Event 1" },
+  { id: 2, name: "Event 2" },
+  { id: 3, name: "Event 3" },
+  { id: 4, name: "Event 4" },
 ];
 
 const EventsPage = () => {
+  const { data: eventsStatusData } = useGetEventStatusQuery({});
+  const status = eventsStatusData?.data;
+  console.log("status", status);
+
   return (
     <>
-      <div className="container mx-auto">
-        <div>
-          <h1 className="text-4xl mb-4">Upcoming Events</h1>
-          <p>
+      <section className="container mx-auto px-4 sm:px-6 lg:px-16 py-12">
+        <div className="max-w-4xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-3">
+            Upcoming Events
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Browse our curated list of padel courts, check real-time
-            availability,
-            <br />
-            and secure your slot in seconds.
+            availability, and secure your slot in seconds.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6 mb-20">
-            {dammyEvents.map((event, index) => (
-              <EventsCard key={index} event={event} />
-            ))}
-          </div>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+          {dammyEvents.map((event) => (
+            <EventsCard key={event.id} event={event} />
+          ))}
+        </div>
+      </section>
+
+      {/* Metrics */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-16 py-12">
         <MetricCard
           metrics={[
             { value: "400+", title: "Organized Events" },
@@ -96,24 +94,29 @@ const EventsPage = () => {
             { value: "98%", title: "Success Rate" },
           ]}
         />
-        <div className="container mx-auto my-20">
-          <h1 className="text-4xl mb-3">On Its Way events </h1>
-          <p>
+      </section>
+
+      {/* On Its Way Events */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-16 py-12">
+        <div className="max-w-4xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-3">
+            On Its Way Events
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Browse our curated list of padel courts, check real-time
-            availability,
-            <br />
-            and secure your slot in seconds.
+            availability, and secure your slot in seconds.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
-            {wayEventsData.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
         </div>
-      </div>
-      <div>
-        <Membership />
-      </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+          {wayEventsData.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      </section>
+
+      {/* Membership */}
+      <Membership />
     </>
   );
 };

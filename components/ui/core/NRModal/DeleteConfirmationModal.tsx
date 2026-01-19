@@ -14,6 +14,7 @@ interface DeleteModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onConfirm: () => void;
+  title?: string;
 }
 
 const DeleteConfirmationModal: React.FC<DeleteModalProps> = ({
@@ -21,6 +22,7 @@ const DeleteConfirmationModal: React.FC<DeleteModalProps> = ({
   isOpen,
   onOpenChange,
   onConfirm,
+  title,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

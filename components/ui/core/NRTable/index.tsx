@@ -65,7 +65,7 @@ export function NRTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell className="py-6 text-black" key={cell.id}>
+                  <TableCell className="py-8 text-black" key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

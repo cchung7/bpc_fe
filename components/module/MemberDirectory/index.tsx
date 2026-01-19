@@ -2,324 +2,193 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Funnel, Mail, MapPin, Phone, Trophy } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
-import Membership from "../Home/Membership";
-import PlayerCard from "./MemberCard";
-
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-const players = [
-  {
-    name: "Sarah Mitchell",
-    level: "Advanced",
-    paddle: "Selkirk Vanguard",
-    location: "Downtown",
-    image: "/images/12.png",
-    about:
-      "Passionate pickleball player with 5 years of experience. Love playing competitively and helping beginners learn the game.",
-    memberSince: "January 2020",
-    email: "sarah.mitchell@example.com",
-    phone: "+1 (555) 123-4567",
-  },
-  {
-    name: "John Doe",
-    level: "Intermediate",
-    paddle: "Paddle 1",
-    location: "Location 1",
-    image: "/images/12.png",
-    about:
-      "Enthusiastic player looking to improve my game and meet new people.",
-    memberSince: "March 2022",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 234-5678",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    name: "Jane Smith",
-    level: "Beginner",
-    paddle: "Paddle 2",
-    location: "Location 2",
-    image: "/images/12.png",
-    about: "New to pickleball and excited to learn!",
-    memberSince: "June 2024",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 345-6789",
-  },
-];
+import { useGetAllmembersByUserQuery } from "@/src/redux/api/memberApi";
+import { Mail, Phone, Trophy } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import Membership from "../Home/Membership";
+import PlayerCard from "./MemberCard";
 
 const MemberDirectory = () => {
   const [searchValue, setSearchValue] = useState("");
+  const { data: membersData } = useGetAllmembersByUserQuery({});
+  const players = membersData?.data || [];
+
+  console.log("members", players);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
 
-  const filteredPlayers = players.filter((player) =>
-    `${player.name} ${player.paddle}`
-      .toLowerCase()
-      .includes(searchValue.toLowerCase())
-  );
+  const filteredPlayers = players.filter((player: any) => {
+    const fullName = `${player.firstName} ${player.lastName}`;
+
+    const searchString = player.paddle
+      ? `${fullName} ${player.paddle}`
+      : fullName;
+    return searchString.toLowerCase().includes(searchValue.toLowerCase());
+  });
 
   const handlePlayerClick = (player: any) => {
     setSelectedMember(player);
     setIsModalOpen(true);
   };
 
+  const formatMemberSince = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long" });
+  };
+
   return (
-    <div className="bg-[#f5fddb] pt-1">
-      <div className="container mx-auto">
-        {/* Header */}
-        <div className="text-center mt-8">
-          <h1 className="text-6xl">Member Directory</h1>
-          <h3 className="my-4 text-xl">
+    <div className="bg-[#f5fddb] pt-6">
+      <div className="container mx-auto px-4 mb-6 sm:px-6 lg:px-16">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-5xl font-bold">Member Directory</h1>
+          <h3 className="text-lg sm:text-xl mt-2">
             Connect with {players.length} club members
           </h3>
 
-          {/* Search */}
-          <div className="flex justify-center items-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
             <input
               type="text"
               placeholder="Search by name or paddle type..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="px-4 py-4 w-1/2 bg-[#ccf64d] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d99b35]"
+              className="px-4 py-3 w-full sm:w-1/2 bg-[#ccf64d] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d99b35]"
             />
 
-            <Button className="py-7 px-4 bg-white border border-gray-300 rounded-lg flex items-center gap-2">
+            {/* <Button className="w-full sm:w-auto py-3 px-4 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2">
               <Funnel size={18} />
               Filter
-            </Button>
+            </Button> */}
           </div>
         </div>
 
-        <div className="mt-10 mb-16 grid grid-cols-1 md:grid-cols-4 gap-8">
-          {filteredPlayers.map((item, idx) => (
-            <div key={idx} onClick={() => handlePlayerClick(item)}>
-              <PlayerCard item={item} />
-            </div>
-          ))}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-14 mt-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredPlayers.map((player: any, idx: any) => (
+              <div
+                key={player.id || idx}
+                onClick={() => handlePlayerClick(player)}
+              >
+                <PlayerCard item={player} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
       <Membership />
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-150 flex flex-col  p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-150 flex flex-col p-0 overflow-hidden">
           {selectedMember && (
             <>
-              <div className="bg-lime-200 p-8">
-                <div className="flex items-start gap-4">
-                  <Image
-                    src={selectedMember.image}
-                    alt={selectedMember.name}
-                    width={112}
-                    height={112}
-                    className="w-28 h-28 rounded-full object-cover ring-4 ring-lime-400 shadow-lg"
-                  />
-                  <div className="flex-1">
-                    <DialogHeader>
-                      <DialogTitle className="text-3xl font-bold text-gray-900 mb-2">
-                        {selectedMember.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <Badge className="bg-lime-500 text-white hover:bg-lime-600">
-                      <Trophy size={16} className="mr-1" />
-                      {selectedMember.level}
-                    </Badge>
-                  </div>
+              <div className="bg-lime-200 p-6 sm:p-8 flex flex-col sm:flex-row items-start gap-4">
+                <Image
+                  src={selectedMember.profileImage || "/default-avatar.png"}
+                  alt={`${selectedMember.firstName} ${selectedMember.lastName}`}
+                  width={112}
+                  height={112}
+                  className="w-28 h-28 rounded-full object-cover ring-4 ring-lime-400 shadow-lg"
+                />
+                <div className="flex-1">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                      {selectedMember.firstName} {selectedMember.lastName}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <Badge className="bg-lime-500 text-white hover:bg-lime-600">
+                    <Trophy size={16} className="mr-1" />
+                    {selectedMember.skillLevel || "Intermediate"}
+                  </Badge>
                 </div>
               </div>
 
-              <div className="p-8 max-h-[60vh] overflow-y-auto">
-                {/* About Section */}
-                <div className="mb-8">
-                  <h3 className="text-xl text-gray-900 mb-3">About</h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {selectedMember.about}
+              <div className="p-6 sm:p-8 max-h-[60vh] overflow-y-auto space-y-6">
+                {/* <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    About
+                  </h3>
+                  <p className="text-gray-700">
+                    {selectedMember.about || "No bio available"}
                   </p>
+                </div> */}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    // {
+                    //   label: "Paddle Type",
+                    //   value: selectedMember.paddle || "Not specified",
+                    //   icon: null,
+                    // },
+                    {
+                      label: "Member Since",
+                      value: formatMemberSince(selectedMember.createdAt),
+                      icon: null,
+                    },
+                    // {
+                    //   label: "Location",
+                    //   value: selectedMember.location || "Not specified",
+                    //   icon: MapPin,
+                    // },
+                    {
+                      label: "Skill Level",
+                      value: selectedMember.skillLevel || "Intermediate",
+                      icon: Trophy,
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-gray-50 p-4 rounded-lg shadow flex items-center gap-2"
+                    >
+                      {item.icon && (
+                        <item.icon size={18} className="text-gray-600" />
+                      )}
+                      <div>
+                        <p className="text-sm text-gray-600 font-medium">
+                          {item.label}
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {item.value}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-gray-50 p-4 rounded-lg shadow">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
-                      <span className="text-sm font-medium">Paddle Type</span>
-                    </div>
-                    <p className="text-gray-900 font-semibold">
-                      {selectedMember.paddle}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg shadow">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
-                      <span className="text-sm font-medium">Member Since</span>
-                    </div>
-                    <p className="text-gray-900 font-semibold">
-                      {selectedMember.memberSince}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg shadow">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
-                      <MapPin size={18} />
-                      <span className="text-sm font-medium">Location</span>
-                    </div>
-                    <p className="text-gray-900 font-semibold">
-                      {selectedMember.location}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-lg shadow">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
-                      <Trophy size={18} />
-                      <span className="text-sm font-medium">Skill Level</span>
-                    </div>
-                    <p className="text-gray-900 font-semibold">
-                      {selectedMember.level}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Contact Information */}
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900">
                     Contact Information
                   </h3>
-
-                  <div className="space-y-3">
-                    <Card>
+                  {[
+                    { label: "Email", value: selectedMember.email, icon: Mail },
+                    {
+                      label: "Phone",
+                      value: selectedMember.phoneNumber,
+                      icon: Phone,
+                    },
+                  ].map((item, idx) => (
+                    <Card key={idx}>
                       <CardContent className="flex items-center gap-3 p-4">
                         <div className="bg-lime-100 rounded-full p-3">
-                          <Mail size={20} className="text-lime-600" />
+                          <item.icon size={20} className="text-lime-600" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-600 font-medium">
-                            Email
+                            {item.label}
                           </p>
-                          <p className="text-gray-900">
-                            {selectedMember.email}
-                          </p>
+                          <p className="text-gray-900">{item.value}</p>
                         </div>
                       </CardContent>
                     </Card>
-
-                    <Card>
-                      <CardContent className="flex items-center gap-3 p-4">
-                        <div className="bg-lime-100 rounded-full p-3">
-                          <Phone size={20} className="text-lime-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600 font-medium">
-                            Phone
-                          </p>
-                          <p className="text-gray-900">
-                            {selectedMember.phone}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  ))}
                 </div>
               </div>
             </>

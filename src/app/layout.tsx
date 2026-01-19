@@ -1,8 +1,9 @@
 import NextAuthSessionProvider from "@/lib/NextAuthSessionProvider";
-import ReduxProvider from "../redux/ReduxProvider";
+
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { Toaster } from "sonner";
+import ReduxProvider from "../redux/ReduxProvider";
 import "./globals.css";
 
 const roboto = Roboto({
@@ -11,8 +12,8 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Starter kit",
-  description: "starter kit for nextjs with redux and redux persist",
+  title: "BINNERRI",
+  description: "BINNERRI",
 };
 
 export default function RootLayout({

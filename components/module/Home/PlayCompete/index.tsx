@@ -1,27 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import { useGetUpcommingEventsQuery } from "@/src/redux/api/eventApi";
 import TournamentCard from "./TournamentCard";
 
-const dammyData = [
-  {
-    title: "Advanced Tournament",
-    date: "Saturday, December 28, 2024 at 10:00",
-    location: "Riverside Sports Complex",
-    participants: "1 / 32 participants",
-  },
-  {
-    title: "Advanced Tournament",
-    date: "Saturday, December 28, 2024 at 10:00",
-    location: "Riverside Sports Complex",
-    participants: "1 / 32 participants",
-  },
-  {
-    title: "Advanced Tournament",
-    date: "Saturday, December 28, 2024 at 10:00",
-    location: "Riverside Sports Complex",
-    participants: "1 / 32 participants",
-  },
-];
-
 const PlayCompete = () => {
+  const {
+    data: eventsData,
+    isLoading,
+    error,
+  } = useGetUpcommingEventsQuery({}) as any;
+
+  const events = eventsData?.data?.data || [];
+
+  if (isLoading) return <div>Loading events...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
   return (
     <section className="bg-[#ccf64d]">
       <div className="container mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
@@ -42,10 +36,10 @@ const PlayCompete = () => {
           </div>
         </div>
 
-        {/* Cards Grid */}
+        {/* Tournament Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-14">
-          {dammyData.map((tournament, index) => (
-            <TournamentCard key={index} tournament={tournament} />
+          {events.slice(0, 3).map((tournament: any) => (
+            <TournamentCard key={tournament.id} tournament={tournament} />
           ))}
         </div>
       </div>

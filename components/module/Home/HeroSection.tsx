@@ -2,25 +2,36 @@ import UserCard from "./UserCard";
 
 const HeroSection = () => {
   return (
-    <div className="mt-6 bg-[#f5fddb]">
-      <div className="flex justify-center">
-        <div className="max-w-5xl flex flex-col items-center py-20 px-4 gap-6">
-          <h1 className="text-center text-7xl">
-            USA&apos;s Most Connected <br /> Tech Communitys
+    <section className="bg-[#f5fddb]">
+      <div className="container mx-auto px-4 pt-10 lg:pt-20 pb-28">
+        {/* Text Content */}
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold leading-tight tracking-tight">
+            USA&apos;s Most Connected <br />
+            Tech Communities
           </h1>
-          <p className="text-center mt-4">
-            Engage with leaders, exchange ideas, and build connections <br />{" "}
-            that unlock new opportunities.
+
+          <p className="mt-6 text-base sm:text-lg text-gray-700 max-w-2xl mx-auto">
+            Engage with leaders, exchange ideas, and build connections that
+            unlock new opportunities.
           </p>
-          {/* <Button className="text-center py-7 rounded-4xl px-6">
-            See Upcoming Events
-          </Button> */}
+
+          {/* CTA (optional) */}
+          {/* 
+          <div className="mt-8">
+            <Button className="px-8 py-6 rounded-full text-base">
+              See Upcoming Events
+            </Button>
+          </div> 
+          */}
+        </div>
+
+        {/* User Cards */}
+        <div className="mt-16">
+          <UserCard />
         </div>
       </div>
-      <div>
-        <UserCard />
-      </div>
-    </div>
+    </section>
   );
 };
 

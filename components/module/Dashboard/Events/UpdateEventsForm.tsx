@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
-"use client";
 
-import Image from "next/image";
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageIcon, X } from "lucide-react";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -24,62 +25,67 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  useGetSingleEventQuery,
+  useUpdateEventMutation,
+} from "@/src/redux/api/eventApi";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
-  date: z.date({}),
+  date: z.date(),
   time: z.string().min(1, "Time is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   banner: z.any().optional(),
+  capacity: z.preprocess(
+    (val) => Number(val),
+    z.number().min(1, "Capacity must be at least 1")
+  ),
 });
 
 type EventFormValues = z.infer<typeof formSchema>;
 
-interface UpdateEventFormProps {
-  eventData: {
-    title: string;
-    date: string;
-    time: string;
-    location: string;
-    description: string;
-    bannerUrl?: string;
-  };
-}
+export default function UpdateEventForm() {
+  const { id } = useParams();
+  const router = useRouter();
 
-export function UpdateEventForm() {
-  const eventData = {
-    title: "Event Title",
-    date: "2023-08-10",
-    time: "10:00 AM",
-    location: "Event Location",
-    description: "Event Description",
-    bannerUrl:
-      "https://i.ibb.co.com/93bnTkmr/admin-banner1.jpg",
-  };
+  const { data: response, isLoading, error } = useGetSingleEventQuery(id);
+  const event = response?.data;
 
-  const [preview, setPreview] = useState<string | null>(
-    eventData.bannerUrl || null
-  );
+  const [updateEvent] = useUpdateEventMutation();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const form = useForm<EventFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
-      title: eventData.title,
-      date: eventData.date ? new Date(eventData.date) : undefined,
-      time: eventData.time,
-      location: eventData.location,
-      description: eventData.description,
+      title: "",
+      date: undefined,
+      time: "",
+      location: "",
+      description: "",
       banner: undefined,
+      capacity: 1,
     },
   });
 
   useEffect(() => {
-    if (eventData.bannerUrl) {
-      setPreview(eventData.bannerUrl);
-    }
-  }, [eventData.bannerUrl]);
+    if (!event) return;
+
+    form.reset({
+      title: event.title,
+      date: new Date(event.date),
+      time: event.time,
+      location: event.location,
+      description: event.description,
+      banner: undefined,
+      capacity: event.capacity || 1,
+    });
+
+    setPreview(event.image || null);
+  }, [event, form]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -96,43 +102,59 @@ export function UpdateEventForm() {
   const removeImage = () => {
     setPreview(null);
     form.setValue("banner", undefined);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const onSubmit = async (values: EventFormValues) => {
-    const payload = {
-      ...values,
-      date: values.date.toISOString(),
-    };
+    try {
+      const formData = new FormData();
 
-    console.log("Update Event Submitted:", payload);
+      const payload = {
+        title: values.title,
+        date: values.date.toISOString(),
+        time: values.time,
+        location: values.location,
+        description: values.description,
+        capacity: values.capacity,
+      };
+
+      formData.append("data", JSON.stringify(payload));
+
+      if (values.banner) {
+        formData.append("image", values.banner);
+      }
+
+      await updateEvent({ id, data: formData }).unwrap();
+      toast.success("Event updated successfully");
+      router.push("/admin/dashboard/events");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update event");
+    }
   };
 
-  return (
-    <div className="max-w-8xl mx-auto p-6 space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Update Event</h1>
-        <p className="text-sm text-muted-foreground">
-          Update the details of your event
-        </p>
-      </div>
+  if (isLoading) return <p className="p-6">Loading event...</p>;
 
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="border-b py-4">
-          <CardTitle className="text-lg font-medium">Event Details</CardTitle>
+  if (error)
+    return <p className="p-6 text-red-500">Failed to load event data.</p>;
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Update Event</h1>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Event Details</CardTitle>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <PHInput
                 control={form.control}
                 name="title"
                 label="Title"
-                type="text"
-                placeholder="Enter event title..."
+                placeholder="Event title"
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,7 +171,7 @@ export function UpdateEventForm() {
                     <FormItem>
                       <FormLabel>Time</FormLabel>
                       <FormControl>
-                        <Input type="time" className="h-11" {...field} />
+                        <Input type="time" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -161,8 +183,26 @@ export function UpdateEventForm() {
                 control={form.control}
                 name="location"
                 label="Location"
-                type="text"
-                placeholder="Enter event location..."
+                placeholder="Event location"
+              />
+
+              <FormField
+                control={form.control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Capacity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Event capacity"
+                        min={1}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
               <FormField
@@ -172,11 +212,7 @@ export function UpdateEventForm() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Describe your event..."
-                        className="min-h-30 resize-none"
-                        {...field}
-                      />
+                      <Textarea {...field} className="min-h-30" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,29 +223,24 @@ export function UpdateEventForm() {
                 <FormLabel>Event Banner</FormLabel>
 
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  ref={fileInputRef}
                   className="hidden"
                   onChange={handleImageChange}
                 />
 
                 <div
                   onClick={() => !preview && fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-lg transition-colors ${
-                    preview
-                      ? "p-2 bg-white"
-                      : "p-10 bg-slate-50 hover:bg-slate-100 cursor-pointer"
-                  }`}
+                  className="border-2 border-dashed rounded-lg p-6 cursor-pointer"
                 >
                   {preview ? (
-                    <div className="relative w-5xl mx-auto aspect-video rounded-md overflow-hidden group">
+                    <div className="relative aspect-video">
                       <Image
                         src={preview}
-                        alt="Banner preview"
-                        width={400}
-                        height={400}
-                        className="object-cover w-full h-full mx-auto"
+                        alt="Preview"
+                        fill
+                        className="object-cover rounded"
                       />
                       <button
                         type="button"
@@ -217,31 +248,29 @@ export function UpdateEventForm() {
                           e.stopPropagation();
                           removeImage();
                         }}
-                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
+                        className="absolute top-2 right-2 bg-black/70 p-1 rounded-full text-white"
                       >
-                        <X className="h-4 w-4" />
+                        <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-3 text-slate-500">
-                      <div className="bg-white p-3 rounded-xl border shadow-sm">
-                        <ImageIcon className="h-10 w-10" />
-                      </div>
-                      <p className="text-sm font-medium">
-                        Upload or click to select image
-                      </p>
+                    <div className="flex flex-col items-center text-muted-foreground">
+                      <ImageIcon size={40} />
+                      <p>Click to upload image</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 pt-4 border-t">
-                <Button type="button" variant="secondary" className="px-6 h-11">
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => router.push("/admin/dashboard/events")}
+                >
                   Cancel
                 </Button>
-                <Button type="submit" className="px-6 h-11 font-semibold">
-                  Update Event
-                </Button>
+                <Button type="submit">Update Event</Button>
               </div>
             </form>
           </Form>

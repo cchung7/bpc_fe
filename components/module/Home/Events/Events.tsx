@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useGetUpcommingEventsQuery } from "@/src/redux/api/eventApi";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import EventSearch from "../EventSearch";
@@ -56,20 +58,13 @@ const dammyEvents = [
     price: "59$",
     isPaid: false,
   },
-  {
-    id: "2",
-    image: "https://i.ibb.co.com/vxywP849/Court-Image.png",
-    title: "Semi-indoor courts",
-    description:
-      "Covered from rain but open to airflow, semi-indoor courts offer a balanced experience",
-    time: "7:00 pm - 10:00 pm",
-    location: "Herbst Theatre, 401 Van Ness Ave, San Francisco",
-    price: "59$",
-    isPaid: false,
-  },
 ];
 
 const Events = () => {
+  const { data: upcomingEventData } = useGetUpcommingEventsQuery({}) as any;
+
+  const upcomingEvents = upcomingEventData?.data?.data || [];
+
   const [startIndex, setStartIndex] = useState(0);
   const [middleIndex, setMiddleIndex] = useState(0);
 
@@ -88,41 +83,50 @@ const Events = () => {
   }, []);
 
   return (
-    <div>
+    <section>
       <EventSearch />
-      <div className="text-center px-4 sm:px-8 lg:px-16 py-8 mt-10">
-        <h2 className="text-5xl font-semibold flex flex-wrap items-center justify-center gap-4 lg:justify-center">
+
+      {/* Heading Section */}
+      <div className="px-4 sm:px-6 lg:px-16 py-10 sm:py-14 text-center">
+        <h2 className="flex flex-wrap items-center justify-center gap-3 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight">
           <span>Events that</span>
-          <span className="inline-block relative w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-20">
+
+          <span className="relative inline-block w-14 h-14 sm:w-28 sm:h-28 lg:w-32 lg:h-20">
             <Image
               src={users[middleIndex].profileImage}
               alt={users[middleIndex].name}
               fill
-              className="rounded-3xl object-cover"
+              className="rounded-2xl object-cover"
             />
           </span>
-          <span>Inspire out</span>
+
+          <span>Inspire you</span>
         </h2>
-        <p className="mt-4 text-lg max-w-3xl mx-auto">
+
+        <p className="mt-4 text-sm sm:text-base md:text-lg max-w-3xl mx-auto text-gray-600">
           Our events are crafted to deliver practical insights and foster
           valuable connections. Discover what&apos;s ahead.
         </p>
       </div>
 
-      <div className="container mx-auto">
-        <h1 className="text-4xl mb-4">Upcoming Events</h1>
-        <p>
+      {/* Events Grid */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-16">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-3">
+          Upcoming Events
+        </h1>
+
+        <p className="text-sm sm:text-base text-gray-600 max-w-2xl">
           Browse our curated list of padel courts, check real-time availability,
-          <br />
           and secure your slot in seconds.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6 mb-20">
-          {dammyEvents.map((event, index) => (
-            <EventsCard key={index} event={event} />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6 mb-20">
+          {upcomingEvents.slice(0, 2).map((event: any) => (
+            <EventsCard key={event.id} event={event} />
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

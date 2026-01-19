@@ -6,7 +6,7 @@ import WayEvents from "@/components/module/Home/WayEvents";
 
 const page = () => {
   return (
-    <div>
+    <div className="bg-[#f5fddb]">
       <HeroSection />
       <Events />
       <EventsUSA />

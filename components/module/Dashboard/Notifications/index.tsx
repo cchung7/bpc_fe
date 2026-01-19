@@ -1,38 +1,76 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import {
+  useGetAllEventByNotificationQuery,
+  useSendNotificationMutation,
+} from "@/src/redux/api/notificationApi";
 import { Calendar, CheckCircle, Send, Users } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
-type RecipientType = "all" | "approved" | "event";
+type RecipientType = "ALL" | "APPROVED" | "EVENT";
 
 const RECIPIENT_DATA = {
-  all: { label: "All Members", count: 150, icon: Users },
-  approved: { label: "Approved Only", count: 45, icon: CheckCircle },
-  event: { label: "Event Participants", count: 22, icon: Calendar },
+  ALL: { label: "ALL", count: 150, icon: Users },
+  APPROVED: { label: "APPROVED", count: 45, icon: CheckCircle },
+  EVENT: { label: "EVENT", count: 22, icon: Calendar },
 };
 
 export default function SendNotificationPage() {
-  const [recipient, setRecipient] = useState<RecipientType>("all");
-  const [message, setMessage] = useState("");
+  const [sendNotification, { isLoading }] = useSendNotificationMutation();
+  const { data: getAllEventByNotification } = useGetAllEventByNotificationQuery(
+    {}
+  ) as any;
 
-  const handleSend = () => {
+  const allEvents = getAllEventByNotification?.data ?? [];
+
+  const [recipient, setRecipient] = useState<RecipientType>("ALL");
+  const [message, setMessage] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const handleSend = async () => {
     if (!message.trim()) {
-      console.log("[v0] Notification error: Message is empty");
       return;
     }
 
-    console.log("[v0] Sending Notification:", {
-      recipients: RECIPIENT_DATA[recipient].label,
-      totalRecipients: RECIPIENT_DATA[recipient].count,
+    // Log the data being sent
+    console.log("Sending Notification Data:", {
+      recipientType: RECIPIENT_DATA[recipient].label,
       message: message,
-      timestamp: new Date().toISOString(),
+      eventId: selectedEvent, // Only included if recipient is "EVENT"
     });
 
-    alert("Notification sent! Check the console for details.");
+    try {
+      let res;
+      // Depending on the recipient type, send the notification
+      if (recipient === "ALL") {
+        res = await sendNotification({
+          type: "ALL",
+          message: message,
+        }).unwrap(); // Wait for the response from the API call
+      } else if (recipient === "APPROVED") {
+        res = await sendNotification({
+          type: "APPROVED",
+          message: message,
+        }).unwrap(); // Wait for the response from the API call
+      } else if (recipient === "EVENT" && selectedEvent) {
+        res = (await sendNotification({
+          type: "EVENT",
+          message: message,
+          eventId: selectedEvent,
+        }).unwrap()) as any; // Wait for the response from the API call
+      }
+
+      // Log the successful response
+      console.log("Notification sent successfully:", res);
+      toast.success(res.message || "Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
   };
 
   return (
@@ -48,32 +86,29 @@ export default function SendNotificationPage() {
         </header>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Compose Section */}
           <Card className="lg:col-span-2">
             <CardHeader className="border-b">
               <CardTitle className="text-xl font-medium">
                 Compose Message
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-8 pt-6">
-              {/* Recipients Selection */}
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-700">
                   Recipients<span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  {(
-                    Object.entries(RECIPIENT_DATA) as [
-                      RecipientType,
-                      (typeof RECIPIENT_DATA)["all"]
-                    ][]
-                  ).map(([key, data]) => {
+                  {Object.entries(RECIPIENT_DATA).map(([key, data]) => {
                     const Icon = data.icon;
                     const isActive = recipient === key;
                     return (
                       <button
                         key={key}
-                        onClick={() => setRecipient(key)}
+                        onClick={() => {
+                          setRecipient(key as RecipientType);
+                          setSelectedEvent(null); // Reset selected event when changing recipient
+                        }}
                         className={cn(
                           "flex flex-col items-center justify-center rounded-lg border-2 p-6 transition-all",
                           isActive
@@ -101,7 +136,37 @@ export default function SendNotificationPage() {
                 </div>
               </div>
 
-              {/* Message Area */}
+              {recipient === "EVENT" && (
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-slate-700">
+                    Select Event<span className="text-red-500">*</span>
+                  </label>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {" "}
+                    {/* Added max-height and overflow */}
+                    {allEvents.map((event: any) => (
+                      <button
+                        key={event.id}
+                        onClick={() => setSelectedEvent(event.id)}
+                        className={cn(
+                          "w-full p-4 text-left border rounded-lg",
+                          selectedEvent === event.id
+                            ? "border-[#D4FF4D] bg-[#D4FF4D]/5"
+                            : "border-slate-200 hover:border-slate-300"
+                        )}
+                      >
+                        <div className="font-medium text-slate-900">
+                          {event.title}
+                        </div>
+                        <div className="text-sm text-slate-600">
+                          {event.description}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-700">
                   Message<span className="text-red-500">*</span>
@@ -151,12 +216,12 @@ export default function SendNotificationPage() {
                   </p>
                 </div>
                 <div className="rounded-lg bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  {/* <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Total Recipients
                   </p>
                   <p className="text-3xl font-bold text-slate-900">
                     {RECIPIENT_DATA[recipient].count}
-                  </p>
+                  </p> */}
                 </div>
               </CardContent>
             </Card>

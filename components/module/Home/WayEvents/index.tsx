@@ -1,31 +1,31 @@
-import EventCard from "@/components/Common/EventsCard";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-const wayEventsData = [
-  {
-    id: 1,
-    name: "Event 1",
-  },
-  {
-    id: 2,
-    name: "Event 2",
-  },
-];
+import EventCard from "@/components/Common/EventsCard";
+import { useTodayEventsQuery } from "@/src/redux/api/eventApi";
 
 const WayEvents = () => {
+  const { data: todayEventsData } = useTodayEventsQuery({});
+  const todayEvents = todayEventsData?.data;
+  console.log("todayEvents", todayEvents);
+
   return (
-    <div className="container mx-auto my-20">
-      <h1 className="text-4xl mb-3">On Its Way events </h1>
-      <p>
+    <section className="container mx-auto px-4 sm:px-6 lg:px-16 my-20">
+      <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-3">
+        On Its Way Events
+      </h2>
+
+      <p className="text-sm sm:text-base text-gray-700 max-w-2xl">
         Browse our curated list of padel courts, check real-time availability,
-        <br />
         and secure your slot in seconds.
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
-        {wayEventsData.map((event) => (
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+        {todayEvents?.map((event: any) => (
           <EventCard key={event.id} event={event} />
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 

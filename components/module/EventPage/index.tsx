@@ -1,76 +1,90 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import EventCard from "@/components/Common/EventsCard";
+import {
+  useGetSingleEventDataQuery,
+  useTodayEventsQuery,
+} from "@/src/redux/api/eventApi";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import Membership from "../Home/Membership";
 
-const wayEventsData = [
-  {
-    id: 1,
-    name: "Event 1",
-  },
-  {
-    id: 2,
-    name: "Event 2",
-  },
-];
+export const formatTime = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+  return date.toLocaleTimeString([], options);
+};
 
 const EventDetailsPage = () => {
+  const { id } = useParams() as any;
+  const { data: singleUpCommingEventData } = useGetSingleEventDataQuery({ id });
+  const singleEvent = singleUpCommingEventData?.data as any;
+
+  const { data: todayEventsData } = useTodayEventsQuery({});
+  const todayEvents = todayEventsData?.data;
+  console.log("todayEvents", todayEvents);
+
   return (
     <section className="bg-[#F7FFD9] min-h-screen py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-16 items-start">
-          <div className="space-y-6 border-r border-black/20 pr-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+          <div className="space-y-4 md:space-y-6 border-b md:border-b-0 md:border-r border-black/20 pb-6 md:pb-0 md:pr-8">
             <div className="flex items-center gap-3 text-sm font-medium">
               <CalendarDays className="w-5 h-5" />
-              <span>Jan 20, 2025</span>
+              <span>{new Date(singleEvent?.date).toLocaleDateString()}</span>
             </div>
 
             <div className="flex items-center gap-3 text-sm font-medium">
               <Clock className="w-5 h-5" />
-              <span>7:00 pm – 10:00 pm</span>
+              <span>
+                {singleEvent?.time ? formatTime(singleEvent?.time) : "N/A"}
+              </span>
             </div>
 
             <div className="flex items-center gap-3 text-sm font-medium">
               <MapPin className="w-5 h-5" />
-              <span>Herbst Theatre, 401 Van Ness Ave, San Francisco</span>
+              <span>{singleEvent?.location}</span>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h1 className="text-4xl font-semibold">Global Tech Conference</h1>
+          <div className="space-y-4 md:space-y-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold">
+              {singleEvent?.title}
+            </h1>
 
-            <p className="text-lg text-gray-700">
-              Explore innovations and shape the future of technology
-            </p>
-
-            <p className="text-gray-600 leading-relaxed">
-              The Global Tech Conference offers an exclusive opportunity for
-              members to immerse themselves in the latest technological
-              innovations and visionary ideas. This inspiring event brings
-              together thought leaders, industry pioneers, and tech enthusiasts
-              to exchange insights, foster collaboration, and explore the
-              transformative ideas that define the cutting edge of technology.
+            <p className="text-base sm:text-lg text-gray-700">
+              {singleEvent?.description}
             </p>
           </div>
         </div>
 
-        <div className="mt-20 bg-[#E6FF8F] rounded-3xl p-6">
-          <div className="relative overflow-hidden rounded-2xl">
+        <div className="mt-10 md:mt-20 bg-[#E6FF8F] rounded-3xl p-4 md:p-6">
+          <div className="relative overflow-hidden rounded-2xl h-60 sm:h-80 md:h-96">
             <Image
-              src="/images/Big Picture.png"
-              alt="Tennis Sport Open Tournament"
-              width={1200}
-              height={300}
+              src={singleEvent?.image || "/images/Big Picture.png"}
+              alt={singleEvent?.title || "Event image"}
+              fill
               className="w-full object-cover"
             />
           </div>
         </div>
       </div>
-      <section className="bg-linear-to-r from-pink-100 via-white to-cyan-100 py-20 mt-10">
+
+      <section className="bg-linear-to-r from-pink-100 via-white to-cyan-100 py-16 md:py-20 mt-10">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="flex justify-center">
-              <div className="rounded-[40px] overflow-hidden max-w-md shadow-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
+            <div className="flex justify-center mb-8 lg:mb-0">
+              <div className="rounded-[40px] overflow-hidden max-w-xs sm:max-w-md shadow-lg">
                 <Image
                   src="/images/event1.png"
                   alt="Speaker"
@@ -83,54 +97,41 @@ const EventDetailsPage = () => {
             </div>
 
             <div className="max-w-xl">
-              <h2 className="text-4xl font-semibold flex items-center gap-3">
-                Speakers <span className="text-2xl"></span>
+              <h2 className="text-3xl sm:text-4xl font-semibold flex items-center gap-3">
+                Speakers
               </h2>
 
-              <p className="mt-3 italic text-lg text-gray-700">
+              <p className="mt-3 italic text-base sm:text-lg text-gray-700">
                 Meet the Visionaries Behind Eventverse
               </p>
 
-              <p className="mt-6 text-gray-600 leading-relaxed">
-                <span className="font-semibold text-gray-800">
-                  The Global Tech Conference
-                </span>{" "}
-                offers an exclusive opportunity for members to immerse
-                themselves in the latest technological innovations and visionary
-                ideas. This inspiring event brings together thought leaders,
-                industry pioneers, and tech enthusiasts to exchange insights,
-                foster collaboration, and shape the future of the tech world.
+              <p className="mt-6 text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">
+                {singleEvent?.description}
               </p>
 
-              <p className="mt-4 text-gray-600 leading-relaxed">
-                It’s the perfect setting to spark innovation, build connections,
-                and explore transformative ideas that define the cutting edge of
-                technology.
-              </p>
-
-              <button className="mt-8 inline-flex items-center justify-center rounded-full bg-sky-200 px-8 py-3 text-sm font-medium text-gray-900 transition hover:bg-sky-300">
+              {/* <button className="mt-8 inline-flex items-center justify-center rounded-full bg-sky-200 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-medium text-gray-900 transition hover:bg-sky-300">
                 Explore Events
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
       </section>
+
       <section>
-        <div className="container mx-auto my-20">
-          <h1 className="text-4xl mb-3">On Its Way events </h1>
-          <p>
+        <div className="container mx-auto my-20 px-4">
+          <h1 className="text-3xl sm:text-4xl mb-3">On Its Way Events</h1>
+          <p className="text-sm sm:text-base mb-6">
             Browse our curated list of padel courts, check real-time
-            availability,
-            <br />
-            and secure your slot in seconds.
+            availability, and secure your slot in seconds.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
-            {wayEventsData.map((event) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+            {todayEvents?.map((event: any) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
         </div>
       </section>
+
       <section>
         <Membership />
       </section>
