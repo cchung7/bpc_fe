@@ -97,7 +97,7 @@ const EventsPage = () => {
       </section>
 
       {/* On Its Way Events */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-16 py-12">
+      {/* <section className="container mx-auto px-4 sm:px-6 lg:px-16 py-12">
         <div className="max-w-4xl">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-3">
             On Its Way Events
@@ -113,7 +113,7 @@ const EventsPage = () => {
             <EventCard key={event.id} event={event} />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Membership */}
       <Membership />

@@ -3,7 +3,7 @@ import EventDetailsPage from "@/components/module/EventPage";
 const page = () => {
   return (
     <div>
-      < EventDetailsPage />
+      <EventDetailsPage />
     </div>
   );
 };

@@ -1,8 +1,11 @@
+import ChangePassword from "@/components/module/Auth/ChangePassword";
+
 const ChangePasswordPage = () => {
   return (
     <div>
-      <h1>Change Password</h1>
-      {/* Change Password Form Component would go here */}
+      <ChangePassword />
     </div>
   );
 };
+
+export default ChangePasswordPage;

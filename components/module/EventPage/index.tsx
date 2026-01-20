@@ -47,7 +47,14 @@ const EventDetailsPage = () => {
             <div className="flex items-center gap-3 text-sm font-medium">
               <Clock className="w-5 h-5" />
               <span>
-                {singleEvent?.time ? formatTime(singleEvent?.time) : "N/A"}
+                {singleEvent?.startTime
+                  ? formatTime(singleEvent?.startTime)
+                  : "N/A"}{" "}
+                -{" "}
+                {singleEvent?.endTime
+                  ? formatTime(singleEvent?.endTime)
+                  : "N/A"}{" "}
+                {"(end time) "}
               </span>
             </div>
 
@@ -102,11 +109,11 @@ const EventDetailsPage = () => {
               </h2>
 
               <p className="mt-3 italic text-base sm:text-lg text-gray-700">
-                Meet the Visionaries Behind Eventverse
+                {singleEvent?.description}
               </p>
 
-              <p className="mt-6 text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">
-                {singleEvent?.description}
+              <p className="mt-6 text-gray-600 leading-relaxed text-md sm:text-base md:text-xl">
+                {singleEvent?.title}
               </p>
 
               {/* <button className="mt-8 inline-flex items-center justify-center rounded-full bg-sky-200 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-medium text-gray-900 transition hover:bg-sky-300">

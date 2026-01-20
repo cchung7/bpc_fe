@@ -60,7 +60,7 @@ export const authApi = baseApi.injectEndpoints({
     changePassword: builder.mutation({
       query: (data: any) => ({
         url: "/auth/change-password",
-        method: "POST",
+        method: "PUT",
         body: data,
       }),
     }),
@@ -73,7 +73,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
     updateUser: builder.mutation({
       query: (data: any) => ({
-        url: "/users/profile",
+        url: "/users/update-profile",
         method: "PUT",
         body: data,
       }),

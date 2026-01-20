@@ -23,7 +23,7 @@ type LoginFormValues = {
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
+  password: z.string().min(4, "Password must be at least 6 characters"),
 });
 
 const AdminLogin = () => {
@@ -65,7 +65,7 @@ const AdminLogin = () => {
     <div className="relative min-h-screen w-full">
       <Image
         src="/images/admin-banner1.jpg"
-        alt="Tennis Background"
+        alt="Pickleball Background"
         fill
         priority
         className="object-cover"

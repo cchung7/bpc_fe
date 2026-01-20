@@ -31,8 +31,8 @@ const Membership = () => {
               </Button>
             </Link>
           </div>
-          
-          <div className="relative h-80 sm:h-105 w-full">
+
+          <div className="relative h-80 sm:h-[420px] w-full">
             <Image
               src="/images/man.jpg"
               alt="Membership Court"

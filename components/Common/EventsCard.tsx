@@ -27,7 +27,11 @@ export default function EventCard({ event }: any) {
         <div className="space-y-3 mb-6">
           <div className="flex items-center gap-3 text-sm text-gray-700">
             <Clock className="h-4 w-4" />
-            <span>{event?.time ? formatTime(event?.time) : "N/A"}</span>
+            <span>
+              {event?.startTime ? formatTime(event?.startTime) : "N/A"} -{" "}
+              {event?.endTime ? formatTime(event?.endTime) : "N/A"}{" "}
+              {"(end time) "}
+            </span>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-700">
             <MapPin className="h-4 w-4" />
@@ -40,7 +44,7 @@ export default function EventCard({ event }: any) {
             </span> */}
           </div>
         </div>
-        
+
         <Link href={`/events/${event?.id}`}>
           <Button className="rounded-full px-6 py-5 bg-purple-200 text-purple-900 hover:bg-purple-300">
             Event Details

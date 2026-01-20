@@ -1,162 +1,117 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
+  SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import placeholder from "@/src/assets/placeholders/image_placeholder.png";
-import { useGetMeQuery } from "@/src/redux/api/authApi";
-import { logout } from "@/src/redux/features/authSlice";
-import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-
-export function NavUser() {
-  const { isMobile } = useSidebar();
-  const token = useAppSelector((state) => state.auth.token);
-  const dispatch = useAppDispatch();
-
-  const { data, error, isLoading } = useGetMeQuery({ skip: !token }) as any;
-
-  console.log("data", data);
-
-  const router = useRouter();
+export function NavMain({
+  items,
+}: {
+  items: {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: {
+      title: string;
+      icon?: LucideIcon;
+      url: string;
+    }[];
+  }[];
+}) {
   const pathname = usePathname();
 
-  const handleLogout = async () => {
-    dispatch(logout());
-    router.push("/login?redirect=" + pathname);
-  };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" disabled>
-            <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">...</AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">Loading...</span>
-            </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" disabled>
-            <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">!</AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold text-red-500">Error</span>
-            </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    );
-  }
-
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={data?.avatarUrl || placeholder}
-                  alt={data?.firstName ?? "User"}
-                  className="h-8 w-8 object-cover rounded-lg"
-                />
-                <AvatarFallback className="rounded-lg">
-                  <Image
-                    src={data?.image || placeholder}
-                    alt={data?.firstName ?? "User"}
-                    width={60}
-                    height={60}
-                    className="h-8 w-8 object-cover rounded-lg"
-                  />
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {data?.data?.firstName || "User"}{" "}
-                  {data?.data?.lastName || "User"}
-                </span>
-                <span className="truncate text-xs">
-                  {data?.data?.email || "No email"}
-                </span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={data?.data.profileImage || placeholder.src}
-                    alt={data?.firstName ?? "User"}
-                    className="h-8 w-8 object-cover rounded-lg"
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    <Image
-                      src={data?.data.profileImage || placeholder}
-                      alt={data?.data.firstName ?? "User"}
-                      width={60}
-                      height={60}
-                      className="h-8 w-8 object-cover rounded-lg"
-                    />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    {data?.data.firstName || "User"}{" "}
-                    {data?.data.lastName || "User"}
-                  </span>
-                  <span className="truncate text-xs">
-                    {data?.data.email || "No email"}
-                  </span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
+    <SidebarGroup>
+      <SidebarMenu>
+        {items?.map((item) => {
+          const isActive = item.isActive || pathname === item.url;
 
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+          if (item.items && item.items.length > 0) {
+            return (
+              <Collapsible
+                key={item.title}
+                asChild
+                defaultOpen={isActive}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className={`${
+                        isActive
+                          ? "bg-primary text-black hover:bg-primary/80 hover:text-white"
+                          : ""
+                      }`}
+                    >
+                      {item.icon && <item.icon className="mr-2 h-5 w-5" />}
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <Link href={subItem.url}>
+                              {subItem.icon && (
+                                <subItem.icon className="mr-2 h-5 w-5" />
+                              )}
+                              <span
+                                className={`${
+                                  pathname === subItem.url ? "text-primary" : ""
+                                }`}
+                              >
+                                {subItem.title}
+                              </span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            );
+          }
+
+          // If no sub-items, render as a simple link
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                className={`${
+                  isActive
+                    ? "bg-primary text-white hover:bg-primary/90 hover:text-white"
+                    : ""
+                }`}
+              >
+                <Link href={item.url}>
+                  {item.icon && <item.icon className="mr-2 h-5 w-5" />}
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }

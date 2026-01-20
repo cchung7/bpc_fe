@@ -20,7 +20,7 @@ const Footer = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
-              <h1 className="text-primary text-2xl sm:text-3x1 font-extrabold tracking-tight">
+              <h1 className="text-primary text-2xl sm:text-3xl font-extrabold tracking-tight">
                 Pickleball
               </h1>
               <p className="mt-6 text-white/90 text-base sm:text-lg leading-relaxed max-w-md">
@@ -60,7 +60,7 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row justify-between items-center text-white/60 text-sm gap-4">
             <p>© {new Date().getFullYear()} Pickleball. All rights reserved.</p>
             <div className="flex gap-6">
-              {/* Add social icons here */}
+              {/* Add social icons here if needed */}
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Add custom schema
+// this is for demo purpose add your own custom schema
 export const signUpSchema = z.object({
   name: z.string().nonempty("Name is required."),
   email: z.string().email("Please enter a valid email address."),

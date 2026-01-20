@@ -3,7 +3,7 @@
 module.exports = {
   apps: [
     {
-      name: "bpc_fe",
+      name: "frisco_fighter_frontend",
       script: "node_modules/next/dist/bin/next",
       args: "start",
       env: {

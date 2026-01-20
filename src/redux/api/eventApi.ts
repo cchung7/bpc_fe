@@ -46,7 +46,7 @@ export const eventApi = baseApi.injectEndpoints({
       { page?: number; limit?: number; currentStatus?: string }
     >({
       query: ({ page = 1, limit = 8, currentStatus } = {}) => ({
-        url: `/admin/events?page=${page}&limit=${limit}&currentStatus=${currentStatus}`,
+        url: `/admin/events?page=${page}&limit=${limit}&status=${currentStatus}`,
         method: "GET",
       }),
       // providesTags: ["Events"],
@@ -59,14 +59,13 @@ export const eventApi = baseApi.injectEndpoints({
       }),
     }),
     updateEvent: builder.mutation({
-      query: (credentials) => ({
-        url: `/admin/events/${credentials.id}`,
+      query: ({ id, data }) => ({
+        url: `/admin/events/${id}`,
         method: "PATCH",
-        body: credentials,
+        body: data,
       }),
-      // invalidatesTags: ["Events"],
+      invalidatesTags: ["Events"],
     }),
-
     deleteEvent: builder.mutation<
       { success: boolean; message: string },
       string
@@ -104,6 +103,19 @@ export const eventApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    getAllSpeaker: builder.query({
+      query: () => ({
+        url: `/admin/speakers`,
+        method: "GET",
+      }),
+    }),
+    createSpeaker: builder.mutation<any, any>({
+      query: (data) => ({
+        url: "/admin/speakers",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -118,4 +130,6 @@ export const {
   useGetEventStatusQuery,
   useTodayEventsQuery,
   useRegisterEventsMutation,
+  useGetAllSpeakerQuery,
+  useCreateSpeakerMutation,
 } = eventApi;

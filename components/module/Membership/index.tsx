@@ -87,7 +87,7 @@ const MembershipPage = () => {
             Membership
           </h1>
           <p className="mt-6 max-w-2xl text-white/90 text-base sm:text-lg lg:text-xl">
-            More than a club. A community where tennis, fitness, and social life
+            More than a club. A community where pickleball, fitness, and social life
             come together.
           </p>
         </div>
@@ -96,10 +96,10 @@ const MembershipPage = () => {
         <div className="grid md:grid-cols-2 gap-14 items-center">
           <div>
             <h2 className="text-4xl sm:text-5xl font-extrabold mb-4">
-              Tennis & Programming
+              Binnerri Pickleball Club
             </h2>
             <p className="text-gray-600 text-lg">
-              Year-round tennis on 31 courts with adult and junior programs for
+              Year-round indoor pickleball on 31 courts with adult and junior programs for
               every level.
             </p>
           </div>
@@ -108,7 +108,7 @@ const MembershipPage = () => {
             src="/images/Rectangle 51.png"
             width={600}
             height={600}
-            alt="Tennis Programming"
+            alt="Pickleball"
             className="rounded-2xl object-cover"
           />
         </div>
@@ -237,7 +237,7 @@ const MembershipPage = () => {
               We Would Love to Have You as a Member
             </h2>
             <p className="text-gray-700 text-sm sm:text-base md:text-lg lg:text-xl max-w-lg mx-auto mb-6 leading-relaxed">
-              Join a community committed to tennis, fitness, and lifelong
+              Join a community committed to pickleball, fitness, and lifelong
               friendships.
             </p>
 

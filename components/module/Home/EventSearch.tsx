@@ -11,13 +11,24 @@ export default function EventSearch() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isExpanded, setIsExpanded] = useState(false);
 
+  console.log("date", date);
+
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);
   };
 
   const handleSearch = () => {
     console.log("Selected date:", date);
-    router.push(`/events/event-results?date=${date?.toISOString()}`);
+
+    if (date) {
+      // Format date as YYYY-MM-DD in local timezone
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const localDateString = `${year}-${month}-${day}`;
+
+      router.push(`/events/event-results?date=${localDateString}`);
+    }
     setIsExpanded(false);
   };
 

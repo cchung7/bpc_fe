@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 const page = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-4 sm:px-6 lg:px-20">
@@ -65,6 +68,12 @@ const page = () => {
         <p className="text-gray-500 mt-12 text-center text-sm">
           Last updated: December 27, 2025
         </p>
+      </div>
+      <div className="flex justify-center items-center mt-6">
+        {" "}
+        <Button className="px-8 py-6 rounded-full text-base">
+          <Link href="/register">Register Now</Link>
+        </Button>
       </div>
     </div>
   );

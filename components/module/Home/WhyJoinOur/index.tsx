@@ -10,7 +10,7 @@ const WhyJoinOur = () => {
 
         <div className="max-w-xl">
           <h2 className="text-3xl md:text-4xl mb-4">
-            Why Join Our Pickleball Club
+            Why Join BPC
           </h2>
           <p className="text-base text-muted-foreground leading-relaxed">
             Experience the perfect blend of competition, community, and growth.

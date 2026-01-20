@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/sidebar";
 import Logo from "@/src/assets/logo.png";
 import {
+  Bell,
+  Calendar,
   HandCoins,
   Home,
   InfoIcon,
@@ -78,15 +80,16 @@ const data = {
       {
         title: "Events",
         url: "/admin/dashboard/events",
-        icon: User,
+        icon: Calendar,
       },
+
       {
         title: "Notifications",
         url: "/admin/dashboard/notifications",
-        icon: User,
+        icon: Bell,
       },
       {
-        title: "Go Back To Home",
+        title: "Go Back To User Portal ",
         url: "/",
         icon: Home,
       },
@@ -100,7 +103,7 @@ interface AppSidebarProps {
 
 export default function AppSidebar({ role, ...props }: AppSidebarProps) {
   const sidebarData = data[role?.toLowerCase() as keyof typeof data];
- 
+
   return (
     <Sidebar
       collapsible="icon"
@@ -109,7 +112,7 @@ export default function AppSidebar({ role, ...props }: AppSidebarProps) {
     >
       <SidebarHeader>
         <Link
-          href={"/"}
+          href={"/admin/dashboard"}
           className="flex items-center w-full max-h-40 justify-center"
         >
           <Image

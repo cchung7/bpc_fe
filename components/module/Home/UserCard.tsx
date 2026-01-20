@@ -4,27 +4,27 @@ import Marquee from "react-fast-marquee";
 const dammyUsers = [
   {
     avatar:
-      "https://framerusercontent.com/images/7l4VUEBnvK69WttT6q0ZCT1x2u4.jpeg?scale-down-to=2048",
+      "/events/bpc_1a.jpg",
   },
   {
     avatar:
-      "https://framerusercontent.com/images/5j6KwYErDZMO63uF5f09XuQHd7E.jpeg?scale-down-to=1024",
+      "/events/bpc_1b.jpg",
   },
   {
     avatar:
-      "https://framerusercontent.com/images/B3JJ6ZUucPsexj459R5ZARkKHcs.jpeg?scale-down-to=2048",
+      "/events/bpc_1c.jpg",
   },
   {
     avatar:
-      "https://framerusercontent.com/images/qyN2CKkv6G5gxPKHn8LlwjzAE.jpeg?scale-down-to=1024",
+      "/events/bpc_1d.jpg",
   },
   {
     avatar:
-      "https://framerusercontent.com/images/zf2KY4R2f7Wvq4TM9dVsfLBzhz8.png",
+      "/events/bpc_1e.jpg",
   },
   {
     avatar:
-      "https://framerusercontent.com/images/5j6KwYErDZMO63uF5f09XuQHd7E.jpeg?scale-down-to=1024",
+      "/events/bpc_1f.jpg",
   },
 ];
 

@@ -7,8 +7,7 @@ const HeroSection = () => {
         {/* Text Content */}
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold leading-tight tracking-tight">
-            USA&apos;s Most Connected <br />
-            Tech Communities
+            Featured Events
           </h1>
 
           <p className="mt-6 text-base sm:text-lg text-gray-700 max-w-2xl mx-auto">

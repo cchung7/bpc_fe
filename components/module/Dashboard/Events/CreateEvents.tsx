@@ -10,7 +10,6 @@ import { ImageIcon, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import NRDatePicker from "@/components/form/NRDatePicker";
 import PHInput from "@/components/form/NRInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,17 +24,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import NRDatePicker from "@/components/form/NRDatePicker";
 import { useCreateEventMutation } from "@/src/redux/api/eventApi";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
   date: z.date(),
-  time: z.string().min(1, "Time is required"),
+  startTime: z.string().min(1, "Time is required"),
+  endTime: z.string().min(1, "Time is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   banner: z.any().optional(),
+  // speakerId: z.string(),
   capacity: z.preprocess(
     (val) => Number(val),
     z.number().min(1, "Capacity must be at least 1")
@@ -46,58 +49,68 @@ type EventFormValues = z.infer<typeof formSchema>;
 
 export function EventForm() {
   const router = useRouter();
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [createEvent, { isLoading }] = useCreateEventMutation();
+  // const { data: getAllSpeakerData } = useGetAllSpeakerQuery({}) as any;
+
+  // const allSeaker = getAllSpeakerData?.data ?? [];
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       title: "",
       date: undefined,
-      time: "",
+      startTime: "",
+      endTime: "",
       location: "",
       description: "",
       banner: undefined,
       capacity: 1,
+      // speakerId: "",
     },
   });
 
-  // Image change handler
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreview(reader.result as string);
+      setBannerPreview(reader.result as string);
       form.setValue("banner", file);
     };
     reader.readAsDataURL(file);
   };
 
-  // Remove image handler
-  const removeImage = () => {
-    setPreview(null);
+  const removeBanner = () => {
+    setBannerPreview(null);
     form.setValue("banner", undefined);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (bannerInputRef.current) {
+      bannerInputRef.current.value = "";
     }
   };
 
-  // Submit form handler
   const onSubmit = async (values: EventFormValues) => {
     try {
       const formData = new FormData();
 
-      const { banner, capacity, ...rest } = values;
+      const { banner, capacity, date, ...rest } = values;
 
-      // Ensure capacity is passed as a number to the backend
+      const selectedDate = new Date(date);
+
+      selectedDate.setMinutes(
+        selectedDate.getMinutes() - selectedDate.getTimezoneOffset()
+      );
+
+      const formattedDate = selectedDate.toISOString();
+
       const payload = {
         ...rest,
         capacity: Number(capacity),
-        date: values.date.toISOString(),
+        date: formattedDate,
       };
 
       formData.append("data", JSON.stringify(payload));
@@ -112,7 +125,7 @@ export function EventForm() {
         toast.success(res.message || "Event created successfully");
         router.push("/admin/dashboard/events");
         form.reset();
-        setPreview(null);
+        setBannerPreview(null);
       }
     } catch (error) {
       console.error("Event submit failed:", error);
@@ -148,20 +161,13 @@ export function EventForm() {
                 type="text"
                 placeholder="Enter event title..."
               />
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <NRDatePicker
-                  control={form.control}
-                  name="date"
-                  label="Event Date"
-                />
-
                 <FormField
                   control={form.control}
-                  name="time"
+                  name="startTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Time</FormLabel>
+                      <FormLabel>Start Time</FormLabel>
                       <FormControl>
                         <Input type="time" className="h-11" {...field} />
                       </FormControl>
@@ -169,6 +175,36 @@ export function EventForm() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" className="h-11" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                <NRDatePicker
+                  control={form.control}
+                  name="date"
+                  label="Event Date"
+                />
+                {/* <PHSelect
+                  control={form.control}
+                  name="speakerId"
+                  label="Speaker"
+                  options={allSeaker.map((speaker: any) => ({
+                    label: speaker.name,
+                    value: speaker.id,
+                  }))}
+                /> */}
               </div>
 
               <PHInput
@@ -210,23 +246,25 @@ export function EventForm() {
                 <input
                   type="file"
                   accept="image/*"
-                  ref={fileInputRef}
+                  ref={bannerInputRef}
                   className="hidden"
-                  onChange={handleImageChange}
+                  onChange={handleBannerChange}
                 />
 
                 <div
-                  onClick={() => !preview && fileInputRef.current?.click()}
+                  onClick={() =>
+                    !bannerPreview && bannerInputRef.current?.click()
+                  }
                   className={`border-2 border-dashed rounded-lg transition-colors ${
-                    preview
+                    bannerPreview
                       ? "p-2 bg-white"
                       : "p-6 sm:p-10 bg-slate-50 hover:bg-slate-100 cursor-pointer"
                   }`}
                 >
-                  {preview ? (
+                  {bannerPreview ? (
                     <div className="relative w-full sm:max-w-xl mx-auto aspect-video rounded-md overflow-hidden group">
                       <Image
-                        src={preview}
+                        src={bannerPreview}
                         alt="Banner preview"
                         fill
                         className="object-cover rounded-md"
@@ -235,7 +273,7 @@ export function EventForm() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeImage();
+                          removeBanner();
                         }}
                         className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
                       >
@@ -248,7 +286,7 @@ export function EventForm() {
                         <ImageIcon className="h-10 w-10" />
                       </div>
                       <p className="text-sm font-medium text-center">
-                        Upload or click to select image
+                        Upload or click to select banner image
                       </p>
                     </div>
                   )}
@@ -256,13 +294,15 @@ export function EventForm() {
               </div>
 
               <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="w-full sm:w-auto px-6 h-11"
-                >
-                  Cancel
-                </Button>
+                <Link href="/admin/dashboard/events">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full sm:w-auto px-6 h-11"
+                  >
+                    Cancel
+                  </Button>
+                </Link>
 
                 <Button
                   type="submit"

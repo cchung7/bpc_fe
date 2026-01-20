@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -18,7 +19,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -37,7 +38,7 @@ const step2Schema = z
       .string()
       .email("Invalid email address")
       .min(1, "Email is required"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
     agreedToTerms: z.boolean().refine((val) => val === true, {
       message: "You must agree to the terms and conditions",
@@ -53,7 +54,9 @@ export default function RegistrationForm() {
 
   const [step, setStep] = useState(1);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>("");
   const [photoError, setPhotoError] = useState<string>("");
+  const [step1Data, setStep1Data] = useState<any>(null);
 
   const [register, { isLoading }] = useRegisterMutation() as any;
 
@@ -62,6 +65,8 @@ export default function RegistrationForm() {
     handleSubmit: handleSubmitStep1,
     formState: { errors: errorsStep1 },
     getValues: getValuesStep1,
+    setValue: setValueStep1,
+    reset: resetStep1,
   } = useForm({
     resolver: zodResolver(step1Schema),
     defaultValues: {
@@ -78,6 +83,8 @@ export default function RegistrationForm() {
     handleSubmit: handleSubmitStep2,
     formState: { errors: errorsStep2 },
     getValues: getValuesStep2,
+    setValue: setValueStep2,
+    reset: resetStep2,
   } = useForm({
     resolver: zodResolver(step2Schema),
     defaultValues: {
@@ -88,30 +95,98 @@ export default function RegistrationForm() {
     },
   });
 
+  // Load saved data from localStorage on component mount
+  useEffect(() => {
+    const savedStep1Data = localStorage.getItem("step1Data");
+    const savedStep2Data = localStorage.getItem("step2Data");
+    const savedPhotoPreview = localStorage.getItem("photoPreview");
+
+    if (savedStep1Data) {
+      const parsedStep1Data = JSON.parse(savedStep1Data);
+      setStep1Data(parsedStep1Data);
+
+      resetStep1(parsedStep1Data);
+    }
+
+    if (savedStep2Data) {
+      const parsedStep2Data = JSON.parse(savedStep2Data);
+
+      resetStep2({
+        email: parsedStep2Data.email || "",
+        password: "",
+        confirmPassword: "",
+        agreedToTerms: parsedStep2Data.agreedToTerms || false,
+      });
+    }
+
+    if (savedPhotoPreview) {
+      setPhotoPreview(savedPhotoPreview);
+    }
+  }, [resetStep1, resetStep2]);
+
+  // Load Step 1 data when returning to Step 1
+  useEffect(() => {
+    if (step === 1 && step1Data) {
+      resetStep1(step1Data);
+    }
+  }, [step, step1Data, resetStep1]);
+
+  // Load Step 2 data when going to Step 2
+  useEffect(() => {
+    if (step === 2) {
+      const savedStep2Data = localStorage.getItem("step2Data");
+      if (savedStep2Data) {
+        const parsedStep2Data = JSON.parse(savedStep2Data);
+        resetStep2({
+          email: parsedStep2Data.email || "",
+          password: "",
+          confirmPassword: "",
+          agreedToTerms: parsedStep2Data.agreedToTerms || false,
+        });
+      }
+    }
+  }, [step, resetStep2]);
+
+  // Update localStorage whenever step 1 form data changes
+  useEffect(() => {
+    if (step1Data) {
+      localStorage.setItem("step1Data", JSON.stringify(step1Data));
+    }
+  }, [step1Data]);
+
   const handlePhotoUpload = (e: any) => {
     const file = e.target.files?.[0];
     if (file) {
       setPhoto(file);
-      setPhotoError(""); // Clear error when photo is uploaded
+      const preview = URL.createObjectURL(file);
+      setPhotoPreview(preview);
+      localStorage.setItem("photoPreview", preview);
+      setPhotoError("");
+    } else {
+      setPhotoError("");
     }
   };
 
   const onStep1Submit = (data: any) => {
-    // Validate photo upload
-    if (!photo) {
-      setPhotoError("Photo is required");
-      return;
-    }
-
     console.log("Step 1 Data:", {
       ...data,
       photo: photo ? "Photo uploaded" : "No photo",
     });
+
+    // Save step 1 data to state and localStorage
+    setStep1Data(data);
+    localStorage.setItem("step1Data", JSON.stringify(data));
+
     setStep(2);
   };
 
   const onStep2Submit = async (data: any) => {
-    const step1Data = getValuesStep1();
+    // Save step 2 data to localStorage (excluding password for security)
+    const step2DataToSave = {
+      email: data.email,
+      agreedToTerms: data.agreedToTerms,
+    };
+    localStorage.setItem("step2Data", JSON.stringify(step2DataToSave));
 
     const payload = {
       firstName: step1Data.firstName,
@@ -137,6 +212,14 @@ export default function RegistrationForm() {
 
       if (res.success) {
         toast.success(res.message || "Registration successful");
+
+        setStep1Data(null);
+        setPhoto(null);
+        setPhotoPreview("");
+        localStorage.removeItem("step1Data");
+        localStorage.removeItem("step2Data");
+        localStorage.removeItem("photoPreview");
+
         router.push("/login");
       }
     } catch (error: any) {
@@ -144,26 +227,35 @@ export default function RegistrationForm() {
     }
   };
 
+  const handleBackToStep1 = () => {
+    // Save current step 2 data before going back
+    const currentStep2Data = getValuesStep2();
+    const step2DataToSave = {
+      email: currentStep2Data.email,
+      agreedToTerms: currentStep2Data.agreedToTerms,
+    };
+    localStorage.setItem("step2Data", JSON.stringify(step2DataToSave));
+
+    setStep(1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 items-center">
-        <div className="w-full md:w-1/2 bg-[#0a1628] rounded-3xl p-12 flex items-center justify-center lg:min-h-200">
-          <Image
-            src="/bpc_logo.png"
-            alt="Tennis"
-            className="w-full h-full object-cover"
-            width={500}
-            height={500}
-          />
-        </div>
 
         <div className="w-full md:w-1/2 bg-white rounded-3xl shadow-lg p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Join Our Club
+              Create Account
             </h2>
             <p className="text-gray-600">
-              Create your Tennis Club membership account
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-gray-800 font-semibold hover:underline"
+              >
+                Log in
+              </Link>
             </p>
           </div>
 
@@ -174,12 +266,12 @@ export default function RegistrationForm() {
             >
               <div className="flex flex-col items-center">
                 <label className="text-sm font-medium text-gray-700 mb-3 self-start">
-                  Upload your photo*
+                  Upload your photo (Optional)
                 </label>
                 <label className="w-24 h-24 border-2 border-dashed border-[#a4d65e] rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors overflow-hidden">
-                  {photo ? (
+                  {photoPreview ? (
                     <Image
-                      src={URL.createObjectURL(photo)}
+                      src={photoPreview}
                       alt="Preview"
                       className="w-full h-full object-cover"
                       width={500}
@@ -310,16 +402,6 @@ export default function RegistrationForm() {
               >
                 Next
               </Button>
-
-              <p className="text-center text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="text-gray-800 font-semibold hover:underline"
-                >
-                  Log in
-                </Link>
-              </p>
             </form>
           ) : (
             <form
@@ -425,6 +507,15 @@ export default function RegistrationForm() {
                 {isLoading ? "Loading..." : "Sign Up"}
               </Button>
 
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBackToStep1}
+                className="w-full text-gray-600 hover:text-gray-800 font-medium py-2 transition-colors"
+              >
+                ← Back
+              </Button>
+
               <p className="text-center text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link
@@ -434,15 +525,6 @@ export default function RegistrationForm() {
                   Log in
                 </Link>
               </p>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="w-full text-gray-600 hover:text-gray-800 font-medium py-2 transition-colors"
-              >
-                ← Back
-              </Button>
             </form>
           )}
         </div>

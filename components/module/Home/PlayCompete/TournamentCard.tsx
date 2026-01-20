@@ -38,7 +38,7 @@ const TournamentCard = ({
         <span>{totalRegister}</span>
       </div>
 
-      {/* Uncomment to ADD link to event details */}
+      {/* Uncomment this if you want to add a link to the event details */}
       {/* <Link href={`/events/${tournament.id}`}>
         <button className="w-full bg-[#ccf64d] hover:bg-[#b8e040] text-black font-medium py-2 rounded-lg">
           View Details

@@ -37,32 +37,31 @@ export default function SendNotificationPage() {
       return;
     }
 
-    // Log the data being sent
     console.log("Sending Notification Data:", {
       recipientType: RECIPIENT_DATA[recipient].label,
       message: message,
-      eventId: selectedEvent, // Only included if recipient is "EVENT"
+      eventId: selectedEvent,
     });
 
     try {
       let res;
-      // Depending on the recipient type, send the notification
+
       if (recipient === "ALL") {
         res = await sendNotification({
           type: "ALL",
           message: message,
-        }).unwrap(); // Wait for the response from the API call
+        }).unwrap();
       } else if (recipient === "APPROVED") {
         res = await sendNotification({
           type: "APPROVED",
           message: message,
-        }).unwrap(); // Wait for the response from the API call
+        }).unwrap();
       } else if (recipient === "EVENT" && selectedEvent) {
         res = (await sendNotification({
           type: "EVENT",
           message: message,
           eventId: selectedEvent,
-        }).unwrap()) as any; // Wait for the response from the API call
+        }).unwrap()) as any;
       }
 
       // Log the successful response
@@ -143,7 +142,6 @@ export default function SendNotificationPage() {
                   </label>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {" "}
-                    {/* Added max-height and overflow */}
                     {allEvents.map((event: any) => (
                       <button
                         key={event.id}
@@ -192,7 +190,7 @@ export default function SendNotificationPage() {
                   className="bg-[#D4FF4D] px-6 text-slate-900 hover:bg-[#c2eb46]"
                 >
                   <Send className="mr-2 h-4 w-4" />
-                  Send Notification
+                  {isLoading ? "Sending..." : " Send Notification"}
                 </Button>
               </div>
             </CardContent>

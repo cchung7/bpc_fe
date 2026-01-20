@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageIcon, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import NRDatePicker from "@/components/form/NRDatePicker";
@@ -26,18 +27,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  useGetAllSpeakerQuery,
   useGetSingleEventQuery,
   useUpdateEventMutation,
 } from "@/src/redux/api/eventApi";
-import { toast } from "sonner";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
   date: z.date(),
-  time: z.string().min(1, "Time is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   banner: z.any().optional(),
+  // speakerId: z.string().min(1, "Speaker is required"),
   capacity: z.preprocess(
     (val) => Number(val),
     z.number().min(1, "Capacity must be at least 1")
@@ -53,20 +56,25 @@ export default function UpdateEventForm() {
   const { data: response, isLoading, error } = useGetSingleEventQuery(id);
   const event = response?.data;
 
-  const [updateEvent] = useUpdateEventMutation();
+  const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
+  const { data: getAllSpeakerData } = useGetAllSpeakerQuery({}) as any;
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const allSpeaker = getAllSpeakerData?.data ?? [];
+
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       title: "",
       date: undefined,
-      time: "",
+      startTime: "",
+      endTime: "",
       location: "",
       description: "",
       banner: undefined,
+      // speakerId: "",
       capacity: 1,
     },
   });
@@ -77,101 +85,141 @@ export default function UpdateEventForm() {
     form.reset({
       title: event.title,
       date: new Date(event.date),
-      time: event.time,
+      startTime: event.startTime || "",
+      endTime: event.endTime || "",
       location: event.location,
       description: event.description,
       banner: undefined,
+      // speakerId: event.speakerId || "",
       capacity: event.capacity || 1,
     });
 
-    setPreview(event.image || null);
+    setBannerPreview(event.image || null);
   }, [event, form]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreview(reader.result as string);
+      setBannerPreview(reader.result as string);
       form.setValue("banner", file);
     };
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
-    setPreview(null);
+  const removeBanner = () => {
+    setBannerPreview(null);
     form.setValue("banner", undefined);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
   };
 
   const onSubmit = async (values: EventFormValues) => {
     try {
       const formData = new FormData();
 
+      const { banner, capacity, date, ...rest } = values;
+
+      const selectedDate = new Date(date);
+      selectedDate.setMinutes(
+        selectedDate.getMinutes() - selectedDate.getTimezoneOffset()
+      );
+      const formattedDate = selectedDate.toISOString();
+
       const payload = {
-        title: values.title,
-        date: values.date.toISOString(),
-        time: values.time,
-        location: values.location,
-        description: values.description,
-        capacity: values.capacity,
+        ...rest,
+        capacity: Number(capacity),
+        date: formattedDate,
       };
 
       formData.append("data", JSON.stringify(payload));
 
-      if (values.banner) {
-        formData.append("image", values.banner);
+      if (banner instanceof File) {
+        formData.append("image", banner);
       }
 
-      await updateEvent({ id, data: formData }).unwrap();
-      toast.success("Event updated successfully");
-      router.push("/admin/dashboard/events");
+      const res = (await updateEvent({ id, data: formData }).unwrap()) as any;
+
+      if (res?.success) {
+        toast.success(res.message || "Event updated successfully");
+        router.push("/admin/dashboard/events");
+        form.reset();
+        setBannerPreview(null);
+      }
     } catch (error) {
-      console.error(error);
-      alert("Failed to update event");
+      console.error("Event update failed:", error);
+      toast.error("Failed to update event");
     }
   };
 
-  if (isLoading) return <p className="p-6">Loading event...</p>;
+  if (isLoading) {
+    return (
+      <div className="mx-auto container px-4 sm:px-6 lg:px-8 py-6">
+        <p className="text-center">Loading event...</p>
+      </div>
+    );
+  }
 
-  if (error)
-    return <p className="p-6 text-red-500">Failed to load event data.</p>;
+  if (error) {
+    return (
+      <div className="mx-auto container px-4 sm:px-6 lg:px-8 py-6">
+        <p className="text-center text-red-500">Failed to load event data.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Update Event</h1>
+    <div className="mx-auto container px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
+          Update Event
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Modify the event details below
+        </p>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Details</CardTitle>
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="border-b py-4">
+          <CardTitle className="text-base sm:text-lg font-medium">
+            Event Details
+          </CardTitle>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="pt-4 sm:pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <PHInput
                 control={form.control}
                 name="title"
                 label="Title"
-                placeholder="Event title"
+                type="text"
+                placeholder="Enter event title..."
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <NRDatePicker
-                  control={form.control}
-                  name="date"
-                  label="Event Date"
-                />
-
                 <FormField
                   control={form.control}
-                  name="time"
+                  name="startTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Time</FormLabel>
+                      <FormLabel>Start Time</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" className="h-11" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" className="h-11" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -179,30 +227,37 @@ export default function UpdateEventForm() {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                <NRDatePicker
+                  control={form.control}
+                  name="date"
+                  label="Event Date"
+                />
+                {/* <PHSelect
+                  control={form.control}
+                  name="speakerId"
+                  label="Speaker"
+                  options={allSpeaker.map((speaker: any) => ({
+                    label: speaker.name,
+                    value: speaker.id,
+                  }))}
+                /> */}
+              </div>
+
               <PHInput
                 control={form.control}
                 name="location"
                 label="Location"
-                placeholder="Event location"
+                type="text"
+                placeholder="Enter location..."
               />
 
-              <FormField
+              <PHInput
                 control={form.control}
                 name="capacity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Capacity</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Event capacity"
-                        min={1}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Capacity"
+                type="number"
+                placeholder="Enter capacity..."
               />
 
               <FormField
@@ -212,7 +267,11 @@ export default function UpdateEventForm() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} className="min-h-30" />
+                      <Textarea
+                        placeholder="Describe your event..."
+                        className="min-h-30 sm:min-h-37.5 resize-none"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -223,54 +282,73 @@ export default function UpdateEventForm() {
                 <FormLabel>Event Banner</FormLabel>
 
                 <input
-                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  ref={bannerInputRef}
                   className="hidden"
-                  onChange={handleImageChange}
+                  onChange={handleBannerChange}
                 />
 
                 <div
-                  onClick={() => !preview && fileInputRef.current?.click()}
-                  className="border-2 border-dashed rounded-lg p-6 cursor-pointer"
+                  onClick={() =>
+                    !bannerPreview && bannerInputRef.current?.click()
+                  }
+                  className={`border-2 border-dashed rounded-lg transition-colors ${
+                    bannerPreview
+                      ? "p-2 bg-white"
+                      : "p-6 sm:p-10 bg-slate-50 hover:bg-slate-100 cursor-pointer"
+                  }`}
                 >
-                  {preview ? (
-                    <div className="relative aspect-video">
+                  {bannerPreview ? (
+                    <div className="relative w-full sm:max-w-xl mx-auto aspect-video rounded-md overflow-hidden group">
                       <Image
-                        src={preview}
-                        alt="Preview"
+                        src={bannerPreview}
+                        alt="Banner preview"
                         fill
-                        className="object-cover rounded"
+                        className="object-cover rounded-md"
                       />
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeImage();
+                          removeBanner();
                         }}
-                        className="absolute top-2 right-2 bg-black/70 p-1 rounded-full text-white"
+                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
                       >
-                        <X size={16} />
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center text-muted-foreground">
-                      <ImageIcon size={40} />
-                      <p>Click to upload image</p>
+                    <div className="flex flex-col items-center gap-3 text-slate-500">
+                      <div className="bg-white p-3 rounded-xl border shadow-sm">
+                        <ImageIcon className="h-10 w-10" />
+                      </div>
+                      <p className="text-sm font-medium text-center">
+                        Upload or click to select banner image
+                      </p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t">
+                <Link href="/admin/dashboard/events">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full sm:w-auto px-6 h-11"
+                  >
+                    Cancel
+                  </Button>
+                </Link>
+
                 <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => router.push("/admin/dashboard/events")}
+                  type="submit"
+                  className="w-full sm:w-auto px-6 h-11 font-semibold"
+                  disabled={isUpdating}
                 >
-                  Cancel
+                  {isUpdating ? "Updating..." : "Update Event"}
                 </Button>
-                <Button type="submit">Update Event</Button>
               </div>
             </form>
           </Form>

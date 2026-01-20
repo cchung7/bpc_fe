@@ -21,6 +21,9 @@ type LoginFormValues = {
   email: string;
   password: string;
 };
+interface CustomJwtPayload extends JwtPayload {
+  role: string; // Add the role property here
+}
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -41,18 +44,25 @@ const LoginPage = () => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    console.log("Login Data:", data);
     try {
       const res = await login(data).unwrap();
 
       if (res.success) {
-        router.push("/");
         const token = res.data.token;
+
         setCookie(token);
-        const user = jwtDecode<JwtPayload>(token);
+
+        const user = jwtDecode<CustomJwtPayload>(token);
 
         dispatch(setUser({ token, user }));
+
         toast.success(res.message || "Login successful!");
+
+        if (user?.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/");
+        }
       } else {
         toast.error(res.message || "Login failed");
       }
@@ -64,16 +74,6 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="flex w-full max-w-6xl items-center gap-28 px-4">
-        <div className="hidden md:flex flex-1 items-center justify-center bg-[#0c1421] rounded-lg min-h-[90vh]">
-          <Image
-            src="/bpc_logo.png"
-            alt="BPC Logo"
-            width={420}
-            height={420}
-            className="object-contain"
-            priority
-          />
-        </div>
 
         <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-md">
           <Link href="/">
@@ -87,7 +87,7 @@ const LoginPage = () => {
           </Link>
           <h1 className="text-center text-2xl font-semibold">Welcome Back</h1>
           <p className="mb-6 mt-3 text-center text-sm text-gray-600">
-            Sign in to your Tennis Club account
+            Sign in to your Account
           </p>
           <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
